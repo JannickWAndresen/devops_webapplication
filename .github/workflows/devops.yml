@@ -37,17 +37,10 @@ jobs:
       - name: Build
         run: dotnet msbuild DevOpsWebApplication/DevOpsWebApplication.csproj -maxcpucount -verbosity:m -nologo -consoleloggerparameters:Summary -property:Configuration=Release
 
-      - name: Build and Push Docker image.
+      - name: Build and push Docker image
         run: |
-          REPO_NAME=$(echo "${{ github.repository }}" | tr '[:upper:]' '[:lower:]')
-
-          docker build \
-           -t ghcr.io/$REPO_NAME:staging \
-           -t ghcr.io/$REPO_NAME:${{ steps.semver-app.outputs.version }} \
-           -f DevOpsWebApplication/Dockerfile \
-           .
-          
-          docker push ghcr.io/$REPO_NAME --all-tags
+         docker build \-t ghcr.io/${{ github.repository }}:staging \-t ghcr.io/${{ github.repository }}:${{ steps.semver-app.outputs.version }} \-f DevOpsWebApplication/Dockerfile \
+         docker push ghcr.io/${{ github.repository }} --all-tags 
 
       - name: Create Release Notes 
         uses: ncipollo/release-action@v1

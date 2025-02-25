@@ -34,8 +34,6 @@ jobs:
             -f DevOpsWebApplication/Dockerfile  \
             DevOpsWebApplication
           docker push ghcr.io/jannickwandresen/devops_webapplication --all-tags
-
-          
           docker push ghcr.io/${{ github.repository }} --all-tags
 
       - name: Create Release Notes 

@@ -42,11 +42,11 @@ jobs:
       - name: Create Release Notes 
         uses: ncipollo/release-action@v1
         with:
-          tag: ${{ steps.semver-app.outputs.version }}
-          generateReleaseNotes: true
-          body: |
-            This release includes the following container image:
-            http://ghcr.io/${{ github.repository }}:${{ steps.semver-app.outputs.version }}
+           tag: ${{ steps.semver-app.outputs.version }}-${{ github.run_number }}
+           generateReleaseNotes: true
+           body: |
+              This release includes the following container image:
+              http://ghcr.io/${{ github.repository }}:${{ steps.semver-app.outputs.version }}
       
       - name: Deliver Docker Compose file to Staging
         uses: appleboy/scp-action@v0.1.7

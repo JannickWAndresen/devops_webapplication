@@ -1,30 +1,25 @@
-# Use the official .NET SDK image to build the application
-FROM mcr.microsoft.com/dotnet/sdk:3.1 AS build
+#See https://aka.ms/customizecontainer to learn how to customize your debug container and how Visual Studio uses this Dockerfile to build your images for faster debugging.
 
-# Set the working directory in the container
+FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS base
+USER app
 WORKDIR /app
+EXPOSE 8080
+EXPOSE 8081
 
-# Copy the project file and restore dependencies
-COPY DevOpsWebApplication/*.csproj ./
-RUN dotnet restore "DevOpsWebApplication.csproj"
+FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
+ARG BUILD_CONFIGURATION=Release
+WORKDIR /src
+COPY ["DevOpsWebApplication/DevOpsWebApplication.csproj", "DevOpsWebApplication/"]
+RUN dotnet restore "./DevOpsWebApplication/DevOpsWebApplication.csproj"
+COPY . .
+WORKDIR "/src/DevOpsWebApplication"
+RUN dotnet build "./DevOpsWebApplication.csproj" -c $BUILD_CONFIGURATION -o /app/build
 
-# Copy the rest of the source code
-COPY . ./
+FROM build AS publish
+ARG BUILD_CONFIGURATION=Release
+RUN dotnet publish "./DevOpsWebApplication.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
 
-# Build the application with detailed verbosity
-RUN dotnet build "DevOpsWebApplication.csproj" -c Release -v detailed -o /app/build
-
-# Publish the application to the /app/publish directory
-RUN dotnet publish "DevOpsWebApplication.csproj" -c Release -o /app/publish
-
-# Use the official .NET runtime image to run the application
-FROM mcr.microsoft.com/dotnet/aspnet:3.1 AS runtime
-
-# Set the working directory in the container
+FROM base AS final
 WORKDIR /app
-
-# Copy the published application from the build stage
-COPY --from=build /app/publish .
-
-# Set the entry point to run the application
+COPY --from=publish /app/publish .
 ENTRYPOINT ["dotnet", "DevOpsWebApplication.dll"]

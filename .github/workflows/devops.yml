@@ -13,6 +13,11 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      - name: Setup .NET SDK
+        uses: actions/setup-dotnet@v2
+        with:
+          dotnet-version: '8.x' # Update to the latest version
+
       - name: Application Version
         id: semver-app
         uses: paulhatch/semantic-version@v5.4.0
@@ -26,8 +31,7 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-
-      - name: Build and Push Docker image. 
+      - name: Build and Push Docker image
         run: |
           REPO_NAME=$(echo "${{ github.repository }}" | tr '[:upper:]' '[:lower:]')
 
@@ -36,10 +40,10 @@ jobs:
            -t ghcr.io/$REPO_NAME:${{ steps.semver-app.outputs.version }} \
            -f DevOpsWebApplication/Dockerfile \
            .
-          
+
           docker push ghcr.io/$REPO_NAME --all-tags
 
-      - name: Create Release Notes 
+      - name: Create Release Notes
         uses: ncipollo/release-action@v1
         with:
           tag: ${{ steps.semver-app.outputs.version }}

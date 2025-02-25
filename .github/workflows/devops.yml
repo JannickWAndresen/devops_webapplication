@@ -47,6 +47,7 @@ jobs:
           body: |
             This release includes the following container image:
             http://ghcr.io/${{ github.repository }}:${{ steps.semver-app.outputs.version }}
+      
       - name: Deliver Docker Compose file to Staging
         uses: appleboy/scp-action@v0.1.7
         with:

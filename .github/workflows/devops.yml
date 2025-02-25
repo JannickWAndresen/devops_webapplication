@@ -1,0 +1,20 @@
+name: DevOps Pipeline
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  delivery:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+- name: Application Version
+  id: semver-app
+  uses: paulhatch/semantic-version@5.4.0
+  with:
+    bump_each_commit: true

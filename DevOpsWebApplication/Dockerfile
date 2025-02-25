@@ -5,7 +5,7 @@ FROM mcr.microsoft.com/dotnet/sdk:3.1 AS build
 WORKDIR /app
 
 # Copy the project file and restore dependencies
-COPY *.csproj ./
+COPY DevOpsWebApplication/*.csproj ./
 RUN dotnet restore "DevOpsWebApplication.csproj"
 
 # Copy the rest of the source code

@@ -11,7 +11,7 @@ RUN dotnet restore
 
 # Copy everything else and build application
 COPY . .
-RUN dotnet build -c Release --no-restore -o /app/build
+RUN dotnet build -c Release --no-restore
 
 # Publish stage
 FROM build AS publish

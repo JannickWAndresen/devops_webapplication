@@ -35,7 +35,7 @@ jobs:
         run: dotnet restore DevOpsWebApplication/DevOpsWebApplication.csproj
       
       - name: Build
-        run: dotnet build DevOpsWebApplication/DevOpsWebApplication.csproj -c Release --no-restore --output-type library
+        run: dotnet msbuild DevOpsWebApplication/DevOpsWebApplication.csproj -maxcpucount -verbosity:m -nologo -consoleloggerparameters:Summary -property:Configuration=Release
 
       - name: Build and Push Docker image.
         run: |

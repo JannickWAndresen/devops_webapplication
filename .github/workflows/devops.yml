@@ -24,23 +24,16 @@ jobs:
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Set up .NET
-        uses: actions/setup-dotnet@v2
-        with:
-          dotnet-version: '8.0.x'
-
-      - name: Restore dependencies
-        run: dotnet restore DevOpsWebApplication/DevOpsWebApplication.csproj
-      
-      - name: Build
-        run: dotnet msbuild DevOpsWebApplication/DevOpsWebApplication.csproj -maxcpucount -verbosity:m -nologo -consoleloggerparameters:Summary -property:Configuration=Release
+          password: ${{ secrets.GHCR_TOKEN }}
 
       - name: Build and push Docker image
         run: |
-         docker build \-t ghcr.io/${{ github.repository }}:staging \-t ghcr.io/${{ github.repository }}:${{ steps.semver-app.outputs.version }} \-f DevOpsWebApplication/Dockerfile \
-         docker push ghcr.io/${{ github.repository }} --all-tags 
+          docker build \
+            -t ghcr.io/${{ github.repository }}:staging \
+            -t ghcr.io/${{ github.repository }}:${{ steps.semver-app.outputs.version }} \
+            -f DevOpsWebApplication/Dockerfile .
+          
+          docker push ghcr.io/${{ github.repository }} --all-tags
 
       - name: Create Release Notes 
         uses: ncipollo/release-action@v1

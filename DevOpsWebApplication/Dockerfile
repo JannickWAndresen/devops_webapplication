@@ -1,23 +1,15 @@
 # Dockerfile
-
-# Build stage
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 WORKDIR /src
-
-# Copy project files and restore dependencies
-COPY DevOpsWebApplication/ DevOpsWebApplication/
-WORKDIR /src/DevOpsWebApplication
-RUN dotnet restore
-
-# Copy everything else and build application
+COPY ["DevOpsWebApplication/DevOpsWebApplication.csproj", "DevOpsWebApplication/"]
+RUN dotnet restore "DevOpsWebApplication/DevOpsWebApplication.csproj"
 COPY . .
-RUN dotnet build -c Release --no-restore
+WORKDIR "/src/DevOpsWebApplication"
+RUN dotnet build "DevOpsWebApplication.csproj" -c Release -o /app/build
 
-# Publish stage
 FROM build AS publish
-RUN dotnet publish -c Release --no-restore -o /app/publish
+RUN dotnet publish "DevOpsWebApplication.csproj" -c Release -o /app/publish
 
-# Final runtime image
 FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS final
 WORKDIR /app
 COPY --from=publish /app/publish .

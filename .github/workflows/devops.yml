@@ -22,7 +22,7 @@ jobs:
         uses: docker/login-action@v2
         with:
           registry: ghcr.io
-          username: ${{ github.actor }}
+          username: ${{ JannickWAndresen }}
           password: ${{ secrets.GHCR_TOKEN }}
 
       - name: Build and push Docker image
@@ -31,7 +31,7 @@ jobs:
            -t ghcr.io/${{ github.repository }}:staging \
            -t ghcr.io/${{ github.repository }}:${{ steps.semver-app.outputs.version }} \
            -f DevOpsWebApplication/Dockerfile \
-
+           
            docker push ghcr.io/${{ github.repository }} --all-tags 
 
       - name: Create Release Notes 

@@ -1,16 +1,30 @@
-# Dockerfile
-FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
-WORKDIR /src
-COPY ["DevOpsWebApplication/DevOpsWebApplication.csproj", "DevOpsWebApplication/"]
-RUN dotnet restore "DevOpsWebApplication/DevOpsWebApplication.csproj"
-COPY . .
-WORKDIR "/src/DevOpsWebApplication"
-RUN dotnet build "DevOpsWebApplication.csproj" -c Release -o /app/build
+# Use the official .NET SDK image to build the application
+FROM mcr.microsoft.com/dotnet/sdk:3.1 AS build
 
-FROM build AS publish
+# Set the working directory in the container
+WORKDIR /app
+
+# Copy the project file and restore dependencies
+COPY *.csproj ./
+RUN dotnet restore "DevOpsWebApplication.csproj"
+
+# Copy the rest of the source code
+COPY . ./
+
+# Build the application with detailed verbosity
+RUN dotnet build "DevOpsWebApplication.csproj" -c Release -v detailed -o /app/build
+
+# Publish the application to the /app/publish directory
 RUN dotnet publish "DevOpsWebApplication.csproj" -c Release -o /app/publish
 
-FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS final
+# Use the official .NET runtime image to run the application
+FROM mcr.microsoft.com/dotnet/aspnet:3.1 AS runtime
+
+# Set the working directory in the container
 WORKDIR /app
-COPY --from=publish /app/publish .
+
+# Copy the published application from the build stage
+COPY --from=build /app/publish .
+
+# Set the entry point to run the application
 ENTRYPOINT ["dotnet", "DevOpsWebApplication.dll"]

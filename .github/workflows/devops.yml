@@ -35,7 +35,7 @@ jobs:
            -f DevOpsWebApplication/Dockerfile \
            .
           
-          docker push ghcr.io/$REPO_NAME --all-tags
+          docker push ghcr.io/$REPO_NAME
 
       - name: Create Release Notes 
         uses: ncipollo/release-action@v1

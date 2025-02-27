@@ -12,6 +12,8 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+           fetch-depth: 0
 
       - name: Application Version
         id: semver-app
@@ -42,7 +44,7 @@ jobs:
       - name: Create Release Notes 
         uses: ncipollo/release-action@v1
         with:
-           tag: ${{ steps.semver-app.outputs.version }}-${{ github.run_number }}
+           tag: ${{ steps.semver-app.outputs.version }}
            generateReleaseNotes: true
            body: |
               This release includes the following container image:

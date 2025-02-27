@@ -52,17 +52,79 @@ jobs:
         uses: appleboy/scp-action@v0.1.7
         with:
             host: ${{vars.STAGING_SERVER_IP}}
-            username: ${{vars.STAGING_SERVER_USERNAME}}
+            username: ${{vars.SERVER_USERNAME}}
             key: ${{secrets.STAGING_KEY_SSH_KEY}}
-            source: "compose.yaml"
+            source: "docker-compose-staging.yaml"
             target: dowa/
 
       - name: Run Docker Compose on staging server
         uses: appleboy/ssh-action@v1.2.1
         with:
             host: ${{vars.STAGING_SERVER_IP}}
-            username: ${{vars.STAGING_SERVER_USERNAME}}
+            username: ${{vars.SERVER_USERNAME}}
             key: ${{secrets.STAGING_KEY_SSH_KEY}}
+            script: |
+                cd dowa
+                docker compose pull
+                docker compose up -d
+  
+  deployment:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Application Version
+        id: semver-app
+        uses: paulhatch/semantic-version@v5.4.0
+        with:
+          bump_each_commit: true
+
+      - name: Log in to GHCR
+        uses: docker/login-action@v2
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.github_TOKEN }}
+
+
+      - name: Build and Push Docker image.
+        run: |
+          REPO_NAME=$(echo "${{ github.repository }}" | tr '[:upper:]' '[:lower:]')
+
+          docker build \
+           -t ghcr.io/$REPO_NAME:staging \
+           -t ghcr.io/$REPO_NAME:${{ steps.semver-app.outputs.version }} \
+           -f DevOpsWebApplication/Dockerfile \
+           .
+          
+          docker push ghcr.io/$REPO_NAME --all-tags
+
+      - name: Create Release Notes 
+        uses: ncipollo/release-action@v1
+        with:
+           tag: ${{ steps.semver-app.outputs.version }}-${{ github.run_number }}
+           generateReleaseNotes: true
+           body: |
+              This release includes the following container image:
+              http://ghcr.io/${{ github.repository }}:${{ steps.semver-app.outputs.version }}
+      
+      - name: Deliver Docker Compose file to Production
+        uses: appleboy/scp-action@v0.1.7
+        with:
+            host: ${{vars.PRODUCTION_SERVER_IP}}
+            username: ${{vars.SERVER_USERNAME}}
+            key: ${{secrets.PRODUCTION_KEY_SSH_KEY}}
+            source: "docker-compose-production.yaml"
+            target: dowa/
+
+      - name: Run Docker Compose on Production server
+        uses: appleboy/ssh-action@v1.2.1
+        with:
+            host: ${{vars.PRODUCTION_SERVER_IP}}
+            username: ${{vars.SERVER_USERNAME}}
+            key: ${{secrets.PRODUCTION_KEY_SSH_KEY}}
             script: |
                 cd dowa
                 docker compose pull

@@ -1,0 +1,5 @@
+services:
+    web:
+        image: ghcr.io/jannickwandresen/devops_webapplication:production
+        ports:
+        - "8000:8080"
